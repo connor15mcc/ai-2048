@@ -17,7 +17,7 @@ class Game {
         }
     }
 
-    private void addTile() {
+    public void addTile() {
         if (existsFreeSquare()) {
             int newValue = (Math.random() < 0.9) ? 2 : 4;
             ArrayList<Point> freeSquares = freeSquares();
@@ -56,8 +56,6 @@ class Game {
                 move_left();
                 break;
         }
-        addTile();
-
     }
 
     private void move_up() {
@@ -195,6 +193,35 @@ class Game {
         return false;
     }
 
+    public int countFreeSquares() {
+        int result = 0;
+        for (Integer[] i : values) {
+            for (Integer j : i) {
+                if (j == null) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+
+    public Integer[][] getValues() {
+        return values;
+    }
+
+    public Integer[] getRow(int i) {
+        return values[i];
+    }
+
+    public Integer[] getCol(int i) {
+        Integer[] result = new Integer[size];
+        for (int row = 0; row < size; row++) {
+            result[row] = values[row][i];
+        }
+        return result;
+    }
+
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
@@ -216,7 +243,7 @@ class Game {
         int len = strI.length();
         // adding spacing to short strings
         if (len < spacing) {
-            result.append(" ".repeat(spacing - len)).append(strI);
+            result.append("_".repeat(spacing - len)).append(strI);
         } else if (len > spacing) {
             result.append(strI, 0, spacing);
         } else {

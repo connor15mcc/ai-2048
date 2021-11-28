@@ -4,6 +4,8 @@ class Main {
 
     public static void main(String[] args) {
         Game x = new Game();
+        Heuristics h = new Heuristics();
+
         System.out.println("Welcome to the a new game of 2048:");
         System.out.println(x);
 
@@ -20,6 +22,11 @@ class Main {
             }
             x.move(dir);
             System.out.println(x);
+            x.addTile();
+            System.out.print(x);
+            float currScore = h.calculateScore(x);
+            System.out.println("Score: " + currScore);
+            System.out.println();
         }
     }
 }
