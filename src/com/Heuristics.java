@@ -1,29 +1,60 @@
-public class Heuristics {
-    float score;
-    static float freeSquareWeight = 1;
-    static float monotonicityWeight = 1;
+import java.util.HashMap;
 
-    public float calculateScore(Game g) {
-        float freeSquareScore = calcFreeSquareScore(g);
-        float monotonicityScore = calcMonoScore(g);
-        System.out.println("FSS: " + freeSquareScore + ", MTS: " + monotonicityScore);
-        return freeSquareScore + monotonicityScore;
+public class Heuristics {
+    static double freeSquareWeight = 10;
+    static double monotonicityWeight = 1;
+    static double smoothnessWeight = 2;
+
+    public double calculateScore(Game g) {
+        double freeSquareScore = calcFreeSquareScore(g);
+        double monotonicityScore = calcMonoScore(g);
+        double smoothnessScore = calcSmoothnessScore(g);
+//        System.out.println("FSS: " + freeSquareScore + ", MTS: " + monotonicityScore + ", SS:" + smoothnessScore);
+        return freeSquareScore + monotonicityScore + smoothnessScore;
     }
 
-    private float calcFreeSquareScore(Game g) {
+    private double calcSmoothnessScore(Game g) {
+        Integer result = 0;
+        HashMap<Integer, Integer> counter = new HashMap<>();
+        Integer[][] val = g.getValues();
+        for (int i = 0; i < g.size; i++) {
+            for (int j = 0; j < g.size; j++) {
+                Integer k = val[i][j];
+                if (k == null) {
+                    continue;
+                } else if (counter.containsKey(k)) {
+                    int oldValue = counter.get(k);
+                    counter.put(k, oldValue + 1);
+                } else {
+                    counter.put(k, 1);
+                }
+            }
+        }
+        for (Integer k : counter.keySet()) {
+            result += k * counter.get(k);
+        }
+        return result * smoothnessWeight;
+    }
+
+    private double calcFreeSquareScore(Game g) {
         return g.countFreeSquares() * freeSquareWeight;
     }
 
-    private float calcMonoScore(Game g) {
+    private double calcMonoScore(Game g) {
         Integer[][] values = g.getValues();
-        float rowScore = 0;
-        float colScore = 0;
+        Integer[] pathIndex1 = {0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12};
+        Integer[] valuesLin = new Integer[g.size * g.size];
         for (int i = 0; i < g.size; i++) {
-            rowScore -= monotonicityHelper(g.getRow(i));
-            colScore -= monotonicityHelper(g.getCol(i));
+            for (int j = 0; j < g.size; j++) {
+                valuesLin[g.size * i + j] = values[i][j];
+            }
         }
-        float score = rowScore + colScore;
-        return score * monotonicityWeight;
+        Integer[] pathValues1 = new Integer[g.size * g.size];
+        for (int i = 0; i < g.size * g.size; i++) {
+            pathValues1[i] = valuesLin[pathIndex1[i]];
+        }
+        double monotonicityScore = monotonicityHelper(pathValues1);
+        return monotonicityWeight * monotonicityScore;
     }
 
     private int tileRank(int i) {
@@ -31,34 +62,25 @@ public class Heuristics {
         return result;
     }
 
-    private float monotonicityHelper(Integer[] val) {
+    private double monotonicityHelper(Integer[] val) {
         int len = val.length;
-        float decrScore = 0;
         float incrScore = 0;
         int curr = 0;
         while (curr < len) {
-            while (curr < len && val[curr] == null) {
-                curr++;
-            }
             int next = curr + 1;
-            while (next < len && val[next] == null) {
-                next++;
-            }
-            if (curr >= len || next >= len) return incrScore + decrScore;
+            if (next >= len) return incrScore;
 
-            Integer currValue = tileRank(val[curr]);
-            Integer nextValue = tileRank(val[next]);
+            Integer currValue = (val[curr] == null) ? 0 : tileRank(val[curr]);
+            Integer nextValue = (val[next] == null) ? 0 : tileRank(val[next]);
 
             if (nextValue > currValue) {
-                incrScore += nextValue - currValue;
+                incrScore -= (nextValue - currValue) * (len - curr);
             } else if (nextValue < currValue) {
-                decrScore += currValue - nextValue;
+                incrScore += (currValue - nextValue) * (len - curr);
             }
             curr++;
         }
-        System.out.println(incrScore);
-        System.out.println(decrScore);
-        return incrScore + decrScore;
+        return incrScore;
     }
 
 

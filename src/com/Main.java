@@ -1,32 +1,30 @@
-import java.util.Scanner;
-
 class Main {
 
     public static void main(String[] args) {
-        Game x = new Game();
+        Game g = new Game();
+        Expectimax e = new Expectimax();
         Heuristics h = new Heuristics();
 
         System.out.println("Welcome to the a new game of 2048:");
-        System.out.println(x);
+        System.out.println(g);
 
-        Scanner sc = new Scanner(System.in);
-        while (sc.hasNext()) {
-            if (x.gameOver()) {
-                System.out.println("Sorry, you lost!");
+
+        while (!g.gameOver()) {
+            Integer dir = e.findNextMove(g);
+            if (dir == null) {
                 break;
             }
-            int dir = sc.nextInt();
-            if (dir > 3 || dir < 0) {
-                System.out.println("Sorry, bad input! Try again");
-                continue;
-            }
-            x.move(dir);
-            System.out.println(x);
-            x.addTile();
-            System.out.print(x);
-            float currScore = h.calculateScore(x);
-            System.out.println("Score: " + currScore);
-            System.out.println();
+
+            System.out.println("*".repeat(15));
+            System.out.println("Score: " + h.calculateScore(g) + ", Direction: " + dir);
+            System.out.println(g);
+            g.move(dir);
+            System.out.println(g);
+            g.addTile();
+            System.out.println(g);
+            System.out.println("*".repeat(15));
+
+
         }
     }
 }

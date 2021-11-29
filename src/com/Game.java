@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class Game {
     Integer[][] values;
@@ -10,6 +11,13 @@ class Game {
         values = new Integer[size][size];
         addStartingTiles();
     }
+
+    public Game(Game g) {
+        this.values = new Integer[size][size];
+        for (int i = 0; i < size; i++)
+            this.values[i] = Arrays.copyOf(g.values[i], g.values[i].length);
+    }
+
 
     private void addStartingTiles() {
         for (int n = 0; n < 2; n++) {
@@ -42,6 +50,7 @@ class Game {
     public void move(int dir) {
         // dir = 0 -> up, 1 -> right, 2 -> down, 3 -> left
         // TODO: refactor each directions move/move_aux to a more general function
+        // TODO: verify movement is correct
         switch (dir) {
             case 0:
                 move_up();
@@ -241,7 +250,6 @@ class Game {
         StringBuilder result = new StringBuilder();
         String strI = String.valueOf(i);
         int len = strI.length();
-        // adding spacing to short strings
         if (len < spacing) {
             result.append("_".repeat(spacing - len)).append(strI);
         } else if (len > spacing) {
